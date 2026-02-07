@@ -1,0 +1,41 @@
+# 源文件（TypeScript源码会被编译后发布）
+*.ts
+!*.d.ts
+
+# 开发相关文件
+tsconfig.json
+.vscode/
+.idea/
+*.log
+.DS_Store
+
+# 测试文件
+**/*.test.ts
+**/*.spec.ts
+test/
+tests/
+__tests__/
+
+# 文档文件
+*.md
+!README.md
+
+# 依赖目录
+node_modules/
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+
+# CI/CD配置
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# 其他配置文件
+.eslintrc*
+.prettierrc*
+.editorconfig
+.gitignore
+.npmignore
