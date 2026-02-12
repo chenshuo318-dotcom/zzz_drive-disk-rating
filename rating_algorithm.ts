@@ -17,8 +17,13 @@ import type {
 } from './types';
 // 从 JSON 文件导入角色权重配置
 import characterWeightsData from './character_weight.json';
+// 从 JSON 文件导入角色属性映射表
+import characterMappingData from './Character_Stat_Damage_Mapping_Table.json';
 
 //---配置---
+
+// 单个驱动盘的理论最高分数（S品质）
+export const MAX_DISK_SCORE = 55;
 
 // 配置品质权重
 export const QUALITY_WEIGHTS: Record<string, number> = {
@@ -50,6 +55,8 @@ export const SUB_STATS_POOL: string[] = [
 ];
 //配置所有角色权重配置
 export const characterWeights: CharacterWeightConfig = characterWeightsData;
+//配置角色属性映射表
+export const characterMapping = characterMappingData;
 
 //---工具函数---
 
@@ -63,39 +70,39 @@ export function calculateGrade(finalScore: number): GradeResult {
   let gradeClass = "grade-f";
   let gradeDesc = "可以掰了(是不是没升级？)";
 
-  if (finalScore >= 97) {
+  if (finalScore >= MAX_DISK_SCORE * 0.97) {
     grade = "SSS+";
     gradeClass = "grade-sssp";
     gradeDesc = "极限毕业 (神话盘)";
-  } else if (finalScore >= 93) {
+  } else if (finalScore >= MAX_DISK_SCORE * 0.93) {
     grade = "SSS";
     gradeClass = "grade-sss";
     gradeDesc = "完美毕业 (神盘)";
-  } else if (finalScore >= 90) {
+  } else if (finalScore >= MAX_DISK_SCORE * 0.90) {
     grade = "SS";
     gradeClass = "grade-ss";
     gradeDesc = "大毕业 (极品)";
-  } else if (finalScore >= 80) {
+  } else if (finalScore >= MAX_DISK_SCORE * 0.80) {
     grade = "S";
     gradeClass = "grade-s";
     gradeDesc = "毕业 (好用)";
-  } else if (finalScore >= 70) {
+  } else if (finalScore >= MAX_DISK_SCORE * 0.70) {
     grade = "A";
     gradeClass = "grade-a";
     gradeDesc = "毕业 (标准)";
-  } else if (finalScore >= 60) {
+  } else if (finalScore >= MAX_DISK_SCORE * 0.60) {
     grade = "B";
     gradeClass = "grade-b";
     gradeDesc = "可用 (过渡)";
-  } else if (finalScore >= 50) {
+  } else if (finalScore >= MAX_DISK_SCORE * 0.50) {
     grade = "C";
     gradeClass = "grade-c";
     gradeDesc = "胚子 (需强化)";
-  } else if (finalScore >= 40) {
+  } else if (finalScore >= MAX_DISK_SCORE * 0.40) {
     grade = "D";
     gradeClass = "grade-d";
     gradeDesc = "较差";
-  } else if (finalScore >= 30) {
+  } else if (finalScore >= MAX_DISK_SCORE * 0.30) {
     grade = "E";
     gradeClass = "grade-e";
     gradeDesc = "废弃";
@@ -114,7 +121,7 @@ export function calculateGrade(finalScore: number): GradeResult {
  * @param weightConfig - 角色权重配置
  * @returns 最高权重信息对象
  */
-function calculateMaxWeightInfo(
+export function calculateMaxWeightInfo(
   position: number,
   weightConfig: { [propertyName: string]: number }
 ): MaxWeightInfo {
@@ -152,7 +159,13 @@ function calculateMaxWeightInfo(
     let bestSubWeights: [string, number][] = [];
     
     const slotKey = position as keyof typeof SLOT_MAIN_POOLS;
-    const allMainStats = SLOT_MAIN_POOLS[slotKey] || [];
+    let allMainStats = SLOT_MAIN_POOLS[slotKey] || [];
+    
+    // 如果主词条池包含 '属性伤害'，则展开为所有具体的元素伤害
+    if (allMainStats.includes('属性伤害')) {
+      const elementDamages = characterMapping.ELEMENTS.map(element => `${element}伤害加成`);
+      allMainStats = [...allMainStats.filter(stat => stat !== '属性伤害'), ...elementDamages];
+    }
     
     for (const mainStat of allMainStats) {
       const mainWeight = weightConfig[mainStat] || 0;
@@ -216,7 +229,7 @@ function calculateMaxWeightInfo(
  * - 如果属性值不包含%，且是生命值/攻击力/防御力，则视为小属性
  * - 小属性名称格式：小攻击、小生命、小防御
  */
-function getPropertyName(prop: SubProperty): string {
+export function getPropertyName(prop: SubProperty): string {
   let propertyName = prop.name;
   
   if (!prop.value.includes('%') && ['生命值', '攻击力', '防御力'].includes(prop.name)) {
@@ -286,7 +299,7 @@ export function getConfiguredCharacters(): string[] {
  * - 该函数根据驱动盘的品质、等级、主词条、副词条以及指定角色的权重配置计算评分
  * - 若驱动盘或角色配置不存在，返回默认值（0分）
  */
-function calculateDriveDiscScore(
+export function calculateDriveDiscScore(
 driveDisc: DriveDisc,
 roleName: string = 'default'
 ): DriveDiscScoreResult {
@@ -367,7 +380,7 @@ roleName: string = 'default'
   console.log(`位置${position} - 副词条最大: ${maxWeightInfo.subPropertyMax.toFixed(4)}, 主属性最大: ${maxWeightInfo.mainPropertyMax.toFixed(4)}, 总和: ${maxWeightInfo.maxWeightSum.toFixed(4)}`);
   
   // 步骤5：计算每1权重有效词条分值
-  const scorePerWeight = 55 / maxWeightInfo.maxWeightSum;
+  const scorePerWeight = MAX_DISK_SCORE / maxWeightInfo.maxWeightSum;
   
   // 输出调试信息
   console.log(`位置${position} - 每权重分值: ${scorePerWeight.toFixed(4)}`);
@@ -394,7 +407,7 @@ roleName: string = 'default'
 }
 
 // 4. 计算角色全套驱动盘评分
-function calculateCharacterTotalScore(
+export function calculateCharacterTotalScore(
   characterData: CharacterData
 ): CharacterScoreResult {
   const discScores: { [position: number]: number } = {};
@@ -443,7 +456,7 @@ function calculateCharacterTotalScore(
 }
 
 // 5. 计算所有角色的评分
-function calculateAllCharactersScore(
+export function calculateAllCharactersScore(
   charactersData: CharacterData[]
 ): AllCharactersScoreResult[] {
   return charactersData.map(character => {
@@ -459,9 +472,6 @@ function calculateAllCharactersScore(
 
 // 6. 导出函数
 export {
- calculateDriveDiscScore,
- calculateCharacterTotalScore,
- calculateAllCharactersScore
 };
 
 // 重新导出类型
