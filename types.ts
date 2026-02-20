@@ -1,6 +1,6 @@
 // 驱动盘评分系统类型定义
 
-// 1. 副词条
+// 副词条
 export interface SubProperty {
   name: string;
   value: string;
@@ -9,7 +9,7 @@ export interface SubProperty {
   add: number;
 }
 
-// 1.1 有效副词条详情
+// 有效副词条详情
 export interface ValidPropertyDetail {
   name: string;
   value: string;
@@ -18,7 +18,7 @@ export interface ValidPropertyDetail {
   weightedValue: number;
 }
 
-// 2. 主词条
+// 主词条
 export interface MainProperty {
   name: string;
   value: string;
@@ -35,7 +35,7 @@ export interface DriveDisc {
   subProperties: SubProperty[];
 }
 
-// 4. 角色数据
+// 角色数据
 export interface CharacterData {
   characterName: string;
   characterFullName: string;
@@ -44,7 +44,7 @@ export interface CharacterData {
   driveDiscs: DriveDisc[];
 }
 
-// 4.1 所有角色驱动盘词条权重配置集合
+// 所有角色驱动盘词条权重配置集合
 // 数值表示该词条的权重占比，1为最高权重，0为无效词条
 export interface CharacterWeightConfig {
   [characterName: string]: {
@@ -59,7 +59,7 @@ export interface GradeResult {
   gradeDesc: string;
 }
 
-//6.最大权重信息
+//最大权重信息
 export interface MaxWeightInfo {
   subPropertyMax: number;     // 副词条最大权重
   mainPropertyMax: number;     // 主词条最大权重
@@ -67,7 +67,7 @@ export interface MaxWeightInfo {
   maxWeightFormula: string;    // 最大权重公式字符串
 }
 
-// 6. 单个驱动盘评分结果
+// 单个驱动盘评分结果
 export interface DriveDiscScoreResult {
   score: number;
   subPropertiesWeight: number;
@@ -79,7 +79,7 @@ export interface DriveDiscScoreResult {
   gradeResult?: GradeResult;
 }
 
-// 7. 角色全套驱动盘评分结果
+// 角色全套驱动盘评分结果
 export interface CharacterScoreResult {
   totalScore: number;
   discScores: { [position: number]: number };// 每个位置的驱动盘评分
@@ -94,7 +94,7 @@ export interface CharacterScoreResult {
   }>;
 }
 
-// 7. 所有角色评分结果
+// 所有角色评分结果
 export interface AllCharactersScoreResult {
   characterName: string;
   totalScore: number;

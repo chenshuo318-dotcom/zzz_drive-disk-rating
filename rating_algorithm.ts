@@ -1,6 +1,6 @@
 // 驱动盘评分算法实现
 
-//---导入类型定义---
+//---导入类型定义---//
 
 import type {
   SubProperty,
@@ -20,9 +20,9 @@ import characterWeightsData from './character_weight.json';
 // 从 JSON 文件导入角色属性映射表
 import characterMappingData from './Character_Stat_Damage_Mapping_Table.json';
 
-//---配置---
+//---配置---//
 
-// 单个驱动盘的理论最高分数（S品质）
+// 配置单个驱动盘的理论最高分数
 export const MAX_DISK_SCORE = 55;
 
 // 配置品质权重
@@ -58,7 +58,7 @@ export const characterWeights: CharacterWeightConfig = characterWeightsData;
 //配置角色属性映射表
 export const characterMapping = characterMappingData;
 
-//---工具函数---
+//---工具函数---//
 
 /**
  * 计算驱动盘评分等级
@@ -351,7 +351,7 @@ roleName: string = 'default'
         weightedValue: weightedValue
       });
       
-      console.log(`位置${driveDisc.position} - 副词条: ${prop.name}(${prop.value}) -> 匹配: ${propertyName}, 权重: ${weight}, add: ${addValue}, 加权值: ${weightedValue}`);
+      // console.log(`位置${driveDisc.position} - 副词条: ${prop.name}(${prop.value}) -> 匹配: ${propertyName}, 权重: ${weight}, add: ${addValue}, 加权值: ${weightedValue}`);
     }
   });
   
@@ -377,13 +377,13 @@ roleName: string = 'default'
   const maxWeightInfo = calculateMaxWeightInfo(position, weightConfig);
   
   // 输出调试信息
-  console.log(`位置${position} - 副词条最大: ${maxWeightInfo.subPropertyMax.toFixed(4)}, 主属性最大: ${maxWeightInfo.mainPropertyMax.toFixed(4)}, 总和: ${maxWeightInfo.maxWeightSum.toFixed(4)}`);
+  //console.log(`位置${position} - 副词条最大: ${maxWeightInfo.subPropertyMax.toFixed(4)}, 主属性最大: ${maxWeightInfo.mainPropertyMax.toFixed(4)}, 总和: ${maxWeightInfo.maxWeightSum.toFixed(4)}`);
   
   // 步骤5：计算每1权重有效词条分值
   const scorePerWeight = MAX_DISK_SCORE / maxWeightInfo.maxWeightSum;
   
   // 输出调试信息
-  console.log(`位置${position} - 每权重分值: ${scorePerWeight.toFixed(4)}`);
+  //console.log(`位置${position} - 每权重分值: ${scorePerWeight.toFixed(4)}`);
   
   // 步骤6：计算实际分值和等级结果
   const actualScore = (subPropertiesWeight + mainPropertyWeight) * scorePerWeight * qualityWeight;
@@ -392,7 +392,7 @@ roleName: string = 'default'
   const gradeResult = calculateGrade(actualScore);
   
   // 输出调试信息
-  console.log(`位置${position} - 实际得分: ${actualScore.toFixed(4)},等级结果:${gradeResult.grade} (副词条权重: ${subPropertiesWeight.toFixed(4)} + 主属性权重: ${mainPropertyWeight.toFixed(4)}) × 每权重分值: ${scorePerWeight.toFixed(4)} × 品质权重: ${qualityWeight.toFixed(4)}`);
+  //console.log(`位置${position} - 实际得分: ${actualScore.toFixed(4)},等级结果:${gradeResult.grade} (副词条权重: ${subPropertiesWeight.toFixed(4)} + 主属性权重: ${mainPropertyWeight.toFixed(4)}) × 每权重分值: ${scorePerWeight.toFixed(4)} × 品质权重: ${qualityWeight.toFixed(4)}`);
   
   return {
     score: Math.round(actualScore * 10) / 10, // 保留一位小数
@@ -406,7 +406,17 @@ roleName: string = 'default'
   };
 }
 
-// 4. 计算角色全套驱动盘评分
+/**
+ * 计算角色的总分
+ * @param characterData - 角色数据对象，包含角色名称和驱动盘列表
+ * @returns 角色评分结果对象，包含总分、各部位分数和驱动盘详细信息
+ * 
+ * 说明：
+ * - 该函数遍历角色的所有驱动盘，调用 calculateDriveDiscScore 计算每个驱动盘的评分
+ * - 汇总所有驱动盘的分数得到角色总分
+ * - 确保所有6个部位都计算到，缺失部位计0分
+ * - 返回总分、各部位分数映射和每个驱动盘的详细信息
+ */
 export function calculateCharacterTotalScore(
   characterData: CharacterData
 ): CharacterScoreResult {
@@ -455,7 +465,16 @@ export function calculateCharacterTotalScore(
   };
 }
 
-// 5. 计算所有角色的评分
+/**
+ * 计算所有角色的总分
+ * @param charactersData - 角色数据数组，每个元素包含角色名称和驱动盘列表
+ * @returns 所有角色评分结果数组，每个元素包含角色名称、总分、各部位分数映射和驱动盘详细信息
+ * 
+ * 说明：
+ * - 该函数遍历所有角色，调用 calculateCharacterTotalScore 计算每个角色的总分
+ * - 确保所有6个部位都计算到，缺失部位计0分
+ * - 返回每个角色的总分、各部位分数映射和每个驱动盘的详细信息
+ */
 export function calculateAllCharactersScore(
   charactersData: CharacterData[]
 ): AllCharactersScoreResult[] {
@@ -470,17 +489,3 @@ export function calculateAllCharactersScore(
   });
 }
 
-// 6. 导出函数
-export {
-};
-
-// 重新导出类型
-export type {
- SubProperty,
- MainProperty,
- DriveDisc,
- CharacterData,
- DriveDiscScoreResult,
- CharacterScoreResult,
- AllCharactersScoreResult
-} from './types';
