@@ -1,6 +1,6 @@
 {
   "name": "zzz-drive-disk-rating",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "绝区零驱动盘评分算法库 - Zenless Zone Zero Drive Disk Rating Algorithm Library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
