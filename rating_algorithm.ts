@@ -489,3 +489,61 @@ export function calculateAllCharactersScore(
   });
 }
 
+/**
+ * 优化驱动盘副词条分配策略
+ * @param driveDisc - 要优化的驱动盘对象
+ * @param characterName - 角色名称，用于获取对应的权重配置
+ * @returns 优化后的驱动盘对象
+ * 
+ * 说明：
+ * - 该函数根据角色权重配置，将剩余的升级机会分配给权重最高的有效副词条
+ * - 首先计算驱动盘从当前等级升到最大等级所需的升级次数
+ * - 然后筛选出所有有效副词条（权重 > 0）
+ * - 按权重从高到低排序，选择权重最高的副词条
+ * - 将所有剩余升级机会分配给该副词条，最大化驱动盘的潜力值
+ * - 如果没有有效副词条，则返回原始驱动盘对象
+ * 
+ * 优化逻辑：
+ * 1. 根据驱动盘品质确定最大等级（S级15级，A级12级，B级9级）
+ * 2. 计算剩余升级次数 = (最大等级 - 当前等级) ÷ 3
+ * 3. 筛选有效副词条（权重 > 0）
+ * 4. 按权重排序，选择最高权重的副词条
+ * 5. 将剩余升级次数全部加到该副词条的等级和add值上
+ */
+export function optimizeDriveDisc(driveDisc: DriveDisc, characterName: string): DriveDisc {
+  const weight = (characterWeightsData as any)[characterName];
+  if (!weight) {
+    throw new Error(`角色 ${characterName} 的权重配置不存在`);
+  }
+
+  const maxLevel = driveDisc.rarity === 'S' ? 15 : driveDisc.rarity === 'A' ? 12 : 9;
+  const remainingLevels = maxLevel - driveDisc.level;
+  const remainingUpgrades = Math.floor(remainingLevels / 3);
+
+  const optimizedSubProperties = driveDisc.subProperties.map(sub => ({ ...sub }));
+
+  const validSubProperties = optimizedSubProperties.filter(sub => weight[sub.name] > 0);
+  
+  if (validSubProperties.length === 0) {
+    return driveDisc;
+  }
+
+  validSubProperties.sort((a, b) => weight[b.name] - weight[a.name]);
+
+  const bestSubProperty = validSubProperties[0];
+  const subPropertyIndex = optimizedSubProperties.findIndex(sub => sub.name === bestSubProperty.name);
+  
+  if (subPropertyIndex !== -1) {
+    optimizedSubProperties[subPropertyIndex].level += remainingUpgrades;
+    optimizedSubProperties[subPropertyIndex].add += remainingUpgrades;
+  }
+
+  return {
+    ...driveDisc,
+    level: maxLevel,
+    subProperties: optimizedSubProperties
+  };
+}
+
+//
+
