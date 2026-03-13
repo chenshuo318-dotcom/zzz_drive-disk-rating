@@ -8,7 +8,8 @@ export {
   getConfiguredCharacters,
   calculateDriveDiscScore,
   calculateCharacterTotalScore,
-  calculateAllCharactersScore
+  calculateAllCharactersScore,
+  optimizeDriveDisc
 } from './rating_algorithm';
 
 export type {
