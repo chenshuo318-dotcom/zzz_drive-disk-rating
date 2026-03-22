@@ -53,6 +53,19 @@ export const SUB_STATS_POOL: string[] = [
   '小攻击',
   '小防御'
 ];
+//配置每种品质的驱动盘的最大等级
+export const MAX_LEVELS: Record<string, number> = {
+  'S': 15,
+  'A': 12,
+  'B': 9
+};
+//配置每种品质的驱动盘的副词条上限
+export const MAX_SUB_PROPERTIES: Record<string, number> = {
+  'S': 4,
+  'A': 3,
+  'B': 2
+};
+
 //配置所有角色权重配置
 export const characterWeights: CharacterWeightConfig = characterWeightsData;
 //配置角色属性映射表
@@ -515,12 +528,32 @@ export function optimizeDriveDisc(driveDisc: DriveDisc, characterName: string): 
   if (!weight) {
     throw new Error(`角色 ${characterName} 的权重配置不存在`);
   }
-
-  const maxLevel = driveDisc.rarity === 'S' ? 15 : driveDisc.rarity === 'A' ? 12 : 9;
+  let add_new_sub_property=false;
+  const maxLevel = MAX_LEVELS[driveDisc.rarity];
+  const maxSubProperties = MAX_SUB_PROPERTIES[driveDisc.rarity];
+  if (driveDisc.level < 3 && driveDisc.subProperties.length < maxSubProperties) {
+    add_new_sub_property=true;
+  }
   const remainingLevels = maxLevel - driveDisc.level;
+  
   const remainingUpgrades = Math.floor(remainingLevels / 3);
-
   const optimizedSubProperties = driveDisc.subProperties.map(sub => ({ ...sub }));
+  if (add_new_sub_property) {
+    const bestSubProperty = SUB_STATS_POOL
+      .filter(name => name !== driveDisc.mainProperty.name && !driveDisc.subProperties.some(sub => sub.name === name))
+      .map(name => {
+        return {
+          name,
+          value: ['小生命', '小攻击', '小防御'].includes(name) ? '0' : '0%',
+          level: 0,
+          valid: false,
+          add: 0
+        };
+      })
+      .sort((a, b) => weight[b.name] - weight[a.name])[0];
+      optimizedSubProperties.push(bestSubProperty);
+  }
+
 
   const validSubProperties = optimizedSubProperties.filter(sub => weight[sub.name] > 0);
   
